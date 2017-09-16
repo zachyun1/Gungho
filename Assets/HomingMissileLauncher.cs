@@ -8,6 +8,7 @@ public class HomingMissileLauncher : MonoBehaviour {
 
     public GameObject prefab;
     public float duration;
+    public int damage;
 
 	// Use this for initialization
 	void Start () {
@@ -18,6 +19,7 @@ public class HomingMissileLauncher : MonoBehaviour {
     {
         GameObject projectile = Instantiate(prefab, transform.position, transform.rotation);
         projectile.GetComponent<Homing>().SetAttributes(target, duration, projectileSpeed);
+        projectile.GetComponent<FireballHit>().SetAttributes(damage);
     }
 
 }

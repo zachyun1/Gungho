@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class FireballHit : MonoBehaviour {
 
+    private int damage;
+
     private CircleCollider2D m_collider;
 
 	// Use this for initialization
@@ -19,12 +21,17 @@ public class FireballHit : MonoBehaviour {
 
     }
 
+    public void SetAttributes(int damage)
+    {
+        this.damage = damage;
+    }
+
 
     void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.tag == "Player")
         {
-            //collision.gameObject.GetComponent<PlayerResources>().TakeDamage(5);
+            collision.gameObject.GetComponent<PlayerResources>().TakeDamage(damage);
             Destroy(gameObject);
         }
         if (collision.gameObject.layer == 8)

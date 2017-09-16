@@ -10,6 +10,7 @@ public class ProjectileSpray2D : MonoBehaviour {
     public float fireDelay;
     public float attackSpeed;
     public float angle;
+    public int damage;
 
     Transform fireFrom;
     GameObject target;
@@ -75,6 +76,7 @@ public class ProjectileSpray2D : MonoBehaviour {
                 continue;
 
             GameObject projectile = Instantiate(prefab, center, rot) as GameObject;
+            projectile.GetComponent<FireballHit>().SetAttributes(damage);
 
             //Since there is no middle projectile, correct the angles of each other projectile
             if (Mathf.Abs(i) == 1)
@@ -103,6 +105,7 @@ public class ProjectileSpray2D : MonoBehaviour {
 
             GameObject projectile = Instantiate(prefab, center, rot) as GameObject;
             projectile.transform.Rotate(0, 0, angle * i);
+            projectile.GetComponent<FireballHit>().SetAttributes(damage);
 
 
             //Get the rigid body and apply a force towards the target with given velocity

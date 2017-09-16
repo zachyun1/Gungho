@@ -9,6 +9,7 @@ public class ProjectileFire2D : MonoBehaviour
     public float projectileVelocity;
     public int bulletClip = 0;
     public float attackSpeed;
+    public int damage;
 
     private bool readyToFire = true;
     private int bulletsLeft = 0;
@@ -48,6 +49,7 @@ public class ProjectileFire2D : MonoBehaviour
 
         //Instantiate the projectile with the correct angle and position
         GameObject projectile = Instantiate(prefab, center, rot) as GameObject;
+        projectile.GetComponent<FireballHit>().SetAttributes(damage);
 
 
         //Get the rigid body 2D and apply a force towards the target with given velocity

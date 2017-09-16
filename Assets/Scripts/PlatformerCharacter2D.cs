@@ -24,6 +24,9 @@ namespace UnityStandardAssets._2D
         private bool m_Turning = false;
         private Quaternion targetRotation;
         private int lookX = 1;
+        private int attackType = 0;
+
+        public int[] attackValues = { 0, 10, 8, 5 };
 
         private void Awake()
         {
@@ -138,7 +141,22 @@ namespace UnityStandardAssets._2D
             m_Attacking = true;
             m_Rigidbody2D.velocity = new Vector2(m_Rigidbody2D.velocity.x / 1.5f, 
                                                  m_Rigidbody2D.velocity.y / 1.5f);
+            this.attackType = attackType;
+            //AttackHitCheck();
+        }
 
+        public void PunchImpact()
+        {
+            AttackHitCheck();
+        }
+
+        public void MaceImpact()
+        {
+            AttackHitCheck();
+        }
+
+        public void RocketImpact()
+        {
             AttackHitCheck();
         }
 
@@ -148,7 +166,7 @@ namespace UnityStandardAssets._2D
             m_Anim.SetInteger("AttackType", 0);
         }
 
-        private void AttackHitCheck()
+        public void AttackHitCheck()
         {
             //Forward area to place attack check collider
             Vector3 pos = this.transform.position +
@@ -163,7 +181,8 @@ namespace UnityStandardAssets._2D
             {
                 if (colliders[i].gameObject.tag == "Enemy" && !colliders[i].isTrigger)
                 {
-                    colliders[i].gameObject.GetComponent<UnitResources>().TakeDamage(5);
+                    
+                    colliders[i].gameObject.GetComponent<UnitResources>().TakeDamage(attackValues[attackType]);
                     print("Enemy Hit");
                 }
             }

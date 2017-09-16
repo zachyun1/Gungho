@@ -21,6 +21,8 @@ public class OnAttackEnd : StateMachineBehaviour {
         GameObject player = GameObject.FindGameObjectWithTag("Player");
         if(player)
             player.GetComponent<UnityStandardAssets._2D.PlatformerCharacter2D>().SetPlayerAttackState(false);
+            
+        
     }
 
     // OnStateMove is called right after Animator.OnAnimatorMove(). Code that processes and affects root motion should be implemented here

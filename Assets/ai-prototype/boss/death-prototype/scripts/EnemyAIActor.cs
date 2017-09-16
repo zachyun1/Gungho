@@ -29,10 +29,13 @@ public class EnemyAIActor : MonoBehaviour, Actor {
 
 	public float mediumRadius;
 	public float smallRadius;
+    public bool shouldTurn;
 
     public float[] weaponReloadSpeed = { 1.0f, 1.0f, 1.0f };
 
     public GameObject core;
+    public GameObject[] turrets;
+
 
     private bool facingRight;
 	private Animator animator;
@@ -43,7 +46,7 @@ public class EnemyAIActor : MonoBehaviour, Actor {
     private bool machineGunReady = true;
     private bool novaReady = true;
     private bool coneReady = true;
-    private bool[] weaponStatus = { true, true, true };
+    private bool[] weaponStatus = { true, false, false };
 
     private int patrolPoint = 0;
     private bool patrolReady = true;
@@ -67,8 +70,6 @@ public class EnemyAIActor : MonoBehaviour, Actor {
     {
 
     }
-
-
 
     void OnTriggerStay2D(Collider2D collider) {
 		if (collider.gameObject.tag == "Player") {
@@ -142,22 +143,21 @@ public class EnemyAIActor : MonoBehaviour, Actor {
         return (weaponStatus[0] || weaponStatus[1] || weaponStatus[2]) && target;
     }
 
-    public bool IsTargetInHorizontalProjectileRange()
+    public bool AreTurretsDead()
     {
-        if (target == null)
+        foreach(GameObject turr in turrets)
         {
-            return false;
+            if (turr)
+            {
+                gameObject.GetComponent<SteeringAgent>().MaxVelocity = 0;
+                return true;
+            }
+                
         }
-        float y = target.transform.position.y - transform.position.y;
-        float offset = rangeParticleHeight / 2;
-        if ((-offset < y) && (y < offset))
-        {
-            //For now default to false
-            return false;
-            //return true;
-        }
+        gameObject.GetComponent<SteeringAgent>().MaxVelocity = 5;
         return false;
     }
+
 
 	public BehaviourTree.State Idle(BehaviourTreeNode<System.Object> node) {
 		animator.SetBool("idle", true);
@@ -211,7 +211,6 @@ public class EnemyAIActor : MonoBehaviour, Actor {
         setLookAtX(patrolPoints[patrolPoint].transform.position);
         if (IsPatrolPointInRange(patrolPoint))
         {
-            print("reached");
             //seek.TargetPoint = transform.position;
             animator.SetBool("move", false);
             patrolPoint++;
@@ -336,49 +335,49 @@ public class EnemyAIActor : MonoBehaviour, Actor {
 		return BehaviourTree.State.SUCCESS;
 	}
 
+    public BehaviourTree.State PrepareWeapons(BehaviourTreeNode<System.Object> node)
+    {
+        weaponStatus = new bool[] { true, false, false};
+        return BehaviourTree.State.SUCCESS;
+    }
+
     private float setLookAtX(Vector3 target)
     {
-        //print("Looking");
+        
         float lookX = target.x - transform.position.x;
         facingRight = lookX > 0;
         animator.SetFloat("lookX", lookX > 0 ? 1 : -1);
-        if(!facingRight)
+        if(shouldTurn)
         {
-            Vector3 theScale = gameObject.transform.localScale;
-            theScale.x = -1;
-            gameObject.transform.localScale = theScale;
+            if (!facingRight)
+            {
+                Vector3 theScale = gameObject.transform.localScale;
+                theScale.x = -1;
+                gameObject.transform.localScale = theScale;
+            }
+            else
+            {
+                Vector3 theScale = gameObject.transform.localScale;
+                theScale.x = 1;
+                gameObject.transform.localScale = theScale;
+            }
         }
-        else
-        {
-            Vector3 theScale = gameObject.transform.localScale;
-            theScale.x = 1;
-            gameObject.transform.localScale = theScale;
 
-        }
         return lookX;
     }
 
-    private BehaviourTree.Node GetMeleeTree()
+    private BehaviourTree.Node GetStageOneTree()
     {
         return new BinaryTreeNode(
-            IsTargetInMeleeRange,
+            AreTurretsDead,
             new SequenceTreeNode(new BehaviourTree.Node[] {
-                new ActionTreeNode<System.Object>(Wake),
-                new ActionTreeNode<System.Object>(MoveTowardsTarget),
                 new BinaryTreeNode(
-                    IsTargetInMeleeAttackRange,
-                    new SequenceTreeNode(new BehaviourTree.Node[] {
-                        new ActionTreeNode<float>(PrepareMeleeAttack),
-                        new ActionTreeNode<float>(MeleeAttack)
-                    }),
+                    IsBombReady,
+                    new ActionTreeNode<Tuple<float, GameObject>>(LaunchAttack),
                     new ActionTreeNode<System.Object>(WithdrawAttack)
                 )
             }),
-            new SequenceTreeNode(new BehaviourTree.Node[] {
-                new ActionTreeNode<System.Object>(WithdrawAttack),
-                new ActionTreeNode<System.Object>(Idle),
-                new ActionTreeNode<System.Object>(node => BehaviourTree.State.FAILURE)
-            })
+            new ActionTreeNode<System.Object>(node => BehaviourTree.State.FAILURE)  
         );
     }
 
@@ -387,7 +386,6 @@ public class EnemyAIActor : MonoBehaviour, Actor {
         return new BinaryTreeNode(
             IsTargetInRange,
             new SequenceTreeNode(new BehaviourTree.Node[] {
-                new ActionTreeNode<System.Object>(Wake),
                 new BinaryTreeNode(
                     PatrolMoveReady,
                     new ActionTreeNode<System.Object>(MoveTowardsPoint),
@@ -410,9 +408,8 @@ public class EnemyAIActor : MonoBehaviour, Actor {
         return new RepeatTreeNode(new BinaryTreeNode(
             IsTargetInRange,
             new SequenceTreeNode(new BehaviourTree.Node[] {
-                //new ActionTreeNode<System.Object>(LookAtTarget),
                 new SelectorTreeNode(new BehaviourTree.Node[] {
-                    //GetMeleeTree(),
+                    GetStageOneTree(),
                     GetRangeTree()
                 })
             }),

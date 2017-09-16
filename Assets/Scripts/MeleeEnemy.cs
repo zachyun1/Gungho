@@ -17,7 +17,6 @@ public class MeleeEnemy : EnemyActor {
         {
             transform.position = Vector2.MoveTowards(new Vector2(transform.position.x, 0), 
                                                      target.transform.position, 2 * Time.deltaTime);
-            print("Moving");
         }
 	}
 
@@ -37,7 +36,6 @@ public class MeleeEnemy : EnemyActor {
             target = collider.gameObject;
             transform.position = Vector2.MoveTowards(transform.position, target.transform.position, 
                                                      2 * Time.deltaTime);
-            print("Moving");
         }
     }
 }

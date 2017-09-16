@@ -47,7 +47,6 @@ public class EnemyActor : MonoBehaviour {
         if(health < 0)
         {
             health = 0;
-            print("Destroyed");
         }
     }
 

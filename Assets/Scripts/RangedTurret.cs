@@ -14,6 +14,7 @@ public class RangedTurret : EnemyActor {
 	void Start () {
         
 	}
+
 	
 	// Update is called once per frame
 	void Update () {

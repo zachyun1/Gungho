@@ -22,6 +22,19 @@ public class BossCore : MonoBehaviour {
             boss.GetComponent<EnemyAIActor>().TakeDamage(health - healthComp.health);
             health = healthComp.health;
         }
+        if(health <= 80)
+        {
+            foreach(GameObject turr in boss.GetComponent<EnemyAIActor>().turrets)
+            {
+                Destroy(turr);
+            }
+            
+            
+        }
+        if(health <= 0)
+        {
+            GameControl.control.PlayerVictory();
+        }
 	}
 
 }

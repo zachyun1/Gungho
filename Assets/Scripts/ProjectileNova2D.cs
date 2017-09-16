@@ -10,6 +10,7 @@ public class ProjectileNova2D : MonoBehaviour {
     public float projectileVelocity;
     public float fireDelay;
     public float attackSpeed;
+    public int damage;
 
     private bool manualFire = false;
     private bool readyToFire = false;
@@ -56,6 +57,7 @@ public class ProjectileNova2D : MonoBehaviour {
 
             //Instantiate each projectile and give a velocity in each's forward direction
             GameObject projectile = Instantiate(prefab, pos, rot);
+            projectile.GetComponent<FireballHit>().SetAttributes(damage);
             Rigidbody2D rigidbody = projectile.GetComponent<Rigidbody2D>();
             rigidbody.velocity = (pos - center).normalized * projectileVelocity;
         }
