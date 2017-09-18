@@ -5,13 +5,17 @@ using UnityEngine;
 public class BossCore : MonoBehaviour {
 
     public GameObject boss;
+    public GameObject stageThreeStructures;
 
+    bool stageThree = false, stageTwo = false;
+    EnemyAIActor bossComp;
     int health;
     UnitResources healthComp;
 
     // Use this for initialization
     void Start () {
         healthComp = GetComponent<UnitResources>();
+        bossComp = boss.GetComponent<EnemyAIActor>();
         health = healthComp.health;
 	}
 	
@@ -22,18 +26,24 @@ public class BossCore : MonoBehaviour {
             boss.GetComponent<EnemyAIActor>().TakeDamage(health - healthComp.health);
             health = healthComp.health;
         }
-        if(health <= 80)
+        if(health <= 15 && !stageTwo)
         {
-            foreach(GameObject turr in boss.GetComponent<EnemyAIActor>().turrets)
+            foreach(GameObject turr in bossComp.turrets)
             {
                 Destroy(turr);
             }
+            bossComp.SetWeaponStates(true, true, true);
+            stageTwo = true;
             
             
         }
-        if(health <= 0)
+        if(health <= 10 && !stageThree)
         {
-            GameControl.control.PlayerVictory();
+            //GameControl.control.PlayerVictory();
+            boss.GetComponent<Animator>().SetTrigger("StageThree");
+            bossComp.SetStageThree();
+            Destroy(stageThreeStructures);
+            stageThree = true;
         }
 	}
 

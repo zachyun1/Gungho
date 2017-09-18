@@ -22,19 +22,18 @@ public class EnemyAIActor : MonoBehaviour, Actor {
     public float rangeDelay = 0.1f;
     public float rangeTime = 0.1f;
     public float rangeParticleHeight = 1f;
-    public GameObject rangeProjectile;
-    public GameObject CBTprefab;
-    public GameObject debugsphere;
     public GameObject[] patrolPoints;
+    public GameObject[] turrets;
+    public GameObject stageThreePoint;
 
-	public float mediumRadius;
+
+    public float mediumRadius;
 	public float smallRadius;
     public bool shouldTurn;
 
     public float[] weaponReloadSpeed = { 1.0f, 1.0f, 1.0f };
+    public float[] stageThreeReloadSpeed = { 6.0f, 6.0f, 6.0f };
 
-    public GameObject core;
-    public GameObject[] turrets;
 
 
     private bool facingRight;
@@ -43,13 +42,12 @@ public class EnemyAIActor : MonoBehaviour, Actor {
     private Seek seek;
     private Image healthBar;
 
-    private bool machineGunReady = true;
-    private bool novaReady = true;
-    private bool coneReady = true;
     private bool[] weaponStatus = { true, false, false };
+    private bool[] weaponStatusStageThree = { true, true, true };
 
     private int patrolPoint = 0;
     private bool patrolReady = true;
+    private bool stageThreeReady = false;
 
     enum AttackTypes
     {
@@ -123,6 +121,15 @@ public class EnemyAIActor : MonoBehaviour, Actor {
 		return false;
 	}
 
+    public bool IsStageThreeInRange()
+    {
+        if (stageThreePoint != null && (stageThreePoint.transform.position - transform.position).magnitude <= smallRadius)
+        {
+            return true;
+        }
+        return false;
+    }
+
     public bool IsPatrolPointInRange(int point)
     {
         if (patrolPoints[point] && (patrolPoints[point].transform.position - transform.position).magnitude <= smallRadius)
@@ -143,6 +150,11 @@ public class EnemyAIActor : MonoBehaviour, Actor {
         return (weaponStatus[0] || weaponStatus[1] || weaponStatus[2]) && target;
     }
 
+    public bool IsStageWeaponReady()
+    {
+        return (weaponStatusStageThree[0] || weaponStatusStageThree[1] || weaponStatusStageThree[2]) && target;
+    }
+
     public bool AreTurretsDead()
     {
         foreach(GameObject turr in turrets)
@@ -154,8 +166,13 @@ public class EnemyAIActor : MonoBehaviour, Actor {
             }
                 
         }
-        gameObject.GetComponent<SteeringAgent>().MaxVelocity = 5;
+        gameObject.GetComponent<SteeringAgent>().MaxVelocity = 3;
         return false;
+    }
+
+    public bool StageThreeMode()
+    {
+        return !stageThreeReady;
     }
 
 
@@ -180,16 +197,16 @@ public class EnemyAIActor : MonoBehaviour, Actor {
     
     public BehaviourTree.State MoveTowardsTarget(BehaviourTreeNode<System.Object> node)
     {
-        if (target == null)
+        if (stageThreePoint == null)
         {
             //seek.TargetPoint = transform.position;
             animator.SetBool("move", false);
             return BehaviourTree.State.FAILURE;
         }
-        seek.TargetPoint = target.transform.position;
+        seek.TargetPoint = stageThreePoint.transform.position;
         animator.SetBool("move", true);
-        setLookAtX(target.transform.position);
-        if (IsTargetInMeleeAttackRange())
+        //setLookAtX(target.transform.position);
+        if (IsStageThreeInRange())
         {
             seek.TargetPoint = transform.position;
             animator.SetBool("move", false);
@@ -311,24 +328,48 @@ public class EnemyAIActor : MonoBehaviour, Actor {
         if(weaponStatus[0])
         {
             GetComponent<ProjectileFire2D>().SetBullets(target);
-            StartCoroutine(Reload(0));
+            StartCoroutine(Reload(weaponStatus,weaponReloadSpeed, 0));
         }
         if(weaponStatus[1])
         {
-            GetComponent<HomingMissileLauncher>().Attack(target);
+            //GetComponent<HomingMissileLauncher>().Attack(target);
             GetComponent<ProjectileNova2D>().ManualFire();
-            StartCoroutine(Reload(1));
+            StartCoroutine(Reload(weaponStatus,weaponReloadSpeed, 1));
         }
         if(weaponStatus[2])
         {
             GetComponent<ProjectileSpray2D>().ManualFire(target);
-            StartCoroutine(Reload(2));
+            StartCoroutine(Reload(weaponStatus,weaponReloadSpeed, 2));
         }
         
         return BehaviourTree.State.SUCCESS;
     }
 
-	public BehaviourTree.State WithdrawAttack(BehaviourTreeNode<System.Object> node) {
+    public BehaviourTree.State LaunchStageAttack(BehaviourTreeNode<Tuple<float, GameObject>> node)
+    {
+        animator.SetBool("range", true);
+        animator.SetBool("prepare", false);
+        if (weaponStatusStageThree[0])
+        {
+            //GetComponent<SpawnUnderPlayer>().TentacleAttack(target, transform.position.y);
+            GetComponent<SpawnUnderPlayer>().SetAttributes(target, transform.position.y, 2);
+            StartCoroutine(Reload(weaponStatusStageThree,stageThreeReloadSpeed, 0));
+        }
+        if (weaponStatusStageThree[1])
+        {
+            GetComponent<SpawnUnderPlayer>().ShadowAttack(gameObject, 20);
+            StartCoroutine(Reload(weaponStatusStageThree,stageThreeReloadSpeed, 1));
+        }
+        if (weaponStatusStageThree[2])
+        {
+            
+            StartCoroutine(Reload(weaponStatusStageThree,stageThreeReloadSpeed, 2));
+        }
+
+        return BehaviourTree.State.SUCCESS;
+    }
+
+    public BehaviourTree.State WithdrawAttack(BehaviourTreeNode<System.Object> node) {
 		animator.SetBool("prepare", false);
 		animator.SetBool("melee", false);
         animator.SetBool("range", false);
@@ -381,36 +422,54 @@ public class EnemyAIActor : MonoBehaviour, Actor {
         );
     }
 
-    private BehaviourTree.Node GetRangeTree()
+    private BehaviourTree.Node GetStageTwoTree()
     {
         return new BinaryTreeNode(
-            IsTargetInRange,
-            new SequenceTreeNode(new BehaviourTree.Node[] {
-                new BinaryTreeNode(
-                    PatrolMoveReady,
-                    new ActionTreeNode<System.Object>(MoveTowardsPoint),
-                    new ActionTreeNode<float>(WaitAtPoint)  
-                ),
-                new BinaryTreeNode(
-                    IsBombReady,
-                    new ActionTreeNode<Tuple<float, GameObject>>(LaunchAttack),
-                    new ActionTreeNode<System.Object>(WithdrawAttack))             
-            }),
-            new SequenceTreeNode(new BehaviourTree.Node[] {
+            StageThreeMode,
+            new BinaryTreeNode(
+                IsTargetInRange,
+                new SequenceTreeNode(new BehaviourTree.Node[] {
+                    new BinaryTreeNode(
+                        PatrolMoveReady,
+                        new ActionTreeNode<System.Object>(MoveTowardsPoint),
+                        new ActionTreeNode<float>(WaitAtPoint)
+                        ),
+                    new BinaryTreeNode(
+                        IsBombReady,
+                        new ActionTreeNode<Tuple<float, GameObject>>(LaunchAttack),
+                        new ActionTreeNode<System.Object>(WithdrawAttack))
+                }),
                 new ActionTreeNode<System.Object>(WithdrawAttack)
-            })
+            ),
+            new ActionTreeNode<System.Object>(node => BehaviourTree.State.FAILURE)
         );
     }
 
-	#region Actor implementation
+    private BehaviourTree.Node GetStageThreeTree()
+    {
+        return new BinaryTreeNode(
+            IsStageThreeInRange,
+            new SequenceTreeNode(new BehaviourTree.Node[] {
+                new BinaryTreeNode(
+                    IsStageWeaponReady,
+                    new ActionTreeNode<Tuple<float, GameObject>>(LaunchStageAttack),
+                    new ActionTreeNode<System.Object>(WithdrawAttack)
+                )
+            }),
+            new ActionTreeNode<System.Object>(MoveTowardsTarget)
+        );
+    }
 
-	public BehaviourTree.Node GetBehaviourTree() {
+    #region Actor implementation
+
+    public BehaviourTree.Node GetBehaviourTree() {
         return new RepeatTreeNode(new BinaryTreeNode(
             IsTargetInRange,
             new SequenceTreeNode(new BehaviourTree.Node[] {
                 new SelectorTreeNode(new BehaviourTree.Node[] {
                     GetStageOneTree(),
-                    GetRangeTree()
+                    GetStageTwoTree(),
+                    GetStageThreeTree()
                 })
             }),
             new SequenceTreeNode(new BehaviourTree.Node[]
@@ -428,10 +487,20 @@ public class EnemyAIActor : MonoBehaviour, Actor {
         return facingRight;
     }
 
-    IEnumerator Reload(int attackType)
+    IEnumerator Reload(bool[] weaponInventory, float[] weaponSpeedType, int attackType)
     {
-        weaponStatus[attackType] = false;
-        yield return new WaitForSeconds(weaponReloadSpeed[attackType]);
-        weaponStatus[attackType] = true;
+        weaponInventory[attackType] = false;
+        yield return new WaitForSeconds(weaponSpeedType[attackType]);
+        weaponInventory[attackType] = true;
+    }
+
+    public void SetWeaponStates(bool gun, bool nova, bool spray)
+    {
+        weaponStatus = new bool[] { gun, nova, spray };
+    }
+
+    public void SetStageThree()
+    {
+        stageThreeReady = true;
     }
 }

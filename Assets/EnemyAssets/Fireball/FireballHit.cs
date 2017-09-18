@@ -4,15 +4,18 @@ using UnityEngine;
 
 public class FireballHit : MonoBehaviour {
 
-    private int damage;
+    public bool destroyOnHit = true;
 
-    private CircleCollider2D m_collider;
+    int damage;
+    bool hitDealt = false;
+    CircleCollider2D m_collider;
 
 	// Use this for initialization
 	void Start () {
         m_collider = GetComponent<CircleCollider2D>();
         Physics2D.IgnoreLayerCollision(9, 9, true);
         Physics2D.IgnoreLayerCollision(9, 10, true);
+        Physics2D.IgnoreLayerCollision(9, 11, true);
         Destroy(gameObject, 20.0f);
     }
 	
@@ -29,14 +32,38 @@ public class FireballHit : MonoBehaviour {
 
     void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.tag == "Player")
+        print("ENTERED");
+        if (destroyOnHit)
         {
-            collision.gameObject.GetComponent<PlayerResources>().TakeDamage(damage);
-            Destroy(gameObject);
+            if (collision.gameObject.tag == "Player")
+            {
+                collision.gameObject.GetComponent<PlayerResources>().TakeDamage(damage);
+                Destroy(gameObject);
+            }
+            if (collision.gameObject.layer == 8)
+            {
+                Destroy(gameObject);
+            }
         }
-        if (collision.gameObject.layer == 8)
+        else if(!hitDealt)
         {
-            Destroy(gameObject);
+            if (collision.gameObject.tag == "Player")
+            {
+                collision.gameObject.GetComponent<PlayerResources>().TakeDamage(damage);
+                hitDealt = true;
+            }
+        }
+    }
+
+    void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (!hitDealt)
+        {
+            if (collision.gameObject.tag == "Player")
+            {
+                collision.gameObject.GetComponent<PlayerResources>().TakeDamage(damage);
+                hitDealt = true;
+            }
         }
     }
 }
