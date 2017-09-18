@@ -41,8 +41,11 @@ namespace UnityStandardAssets._2D
             else if (Input.GetKeyDown(KeyCode.E))
                 attackType = 2;
             // Pass all parameters to the character control script.
-            m_Character.Attack(attackType);
-            m_Character.Move(h, crouch, m_Jump);
+            if(!GameControl.control.getPauseState())
+            {
+                m_Character.Attack(attackType);
+                m_Character.Move(h, crouch, m_Jump);
+            }
             m_Jump = false;
         }
     }

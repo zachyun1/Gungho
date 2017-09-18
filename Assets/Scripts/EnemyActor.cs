@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class EnemyActor : MonoBehaviour {
 
-    public int health, maxHealth;
     public int attackDamage;
     public int attackSpeed;
 
@@ -17,12 +16,10 @@ public class EnemyActor : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-        
     }
 	
 	// Update is called once per frame
 	void Update () {
-		
 	}
 
     void OnTriggerStay2D(Collider2D collider)
@@ -40,20 +37,5 @@ public class EnemyActor : MonoBehaviour {
             target = null;
         }
     }
-
-    public void TakeDamage(int value)
-    {
-        health -= value;
-        if(health < 0)
-        {
-            health = 0;
-        }
-    }
-
-    protected void DealDamage(GameObject obj, int value)
-    {
-        
-    }
-
 
 }

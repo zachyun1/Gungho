@@ -26,7 +26,14 @@ namespace UnityStandardAssets._2D
         private int lookX = 1;
         private int attackType = 0;
 
+        public GameObject fist;
         public int[] attackValues = { 0, 10, 8, 5 };
+        public AudioClip[] audioClips;
+        public GameObject rocketPrefab;
+        public GameObject fireFrom;
+        public float projectileVelocity = 1.0f;
+
+        AudioSource m_Audio;
 
         private void Awake()
         {
@@ -35,6 +42,7 @@ namespace UnityStandardAssets._2D
             m_CeilingCheck = transform.Find("CeilingCheck");
             m_Anim = GetComponent<Animator>();
             m_Rigidbody2D = GetComponent<Rigidbody2D>();
+            m_Audio = GetComponent<AudioSource>();
 
             //targetRotation = Quaternion.LookRotation(-transform.forward, Vector3.up);
         }
@@ -147,17 +155,21 @@ namespace UnityStandardAssets._2D
 
         public void PunchImpact()
         {
-            AttackHitCheck();
+            AttackHitCheck(true, 0);
         }
 
         public void MaceImpact()
         {
-            AttackHitCheck();
+            m_Audio.clip = audioClips[2];
+            m_Audio.Play(0);
+            AttackHitCheck(false, 2);
         }
 
         public void RocketImpact()
         {
-            AttackHitCheck();
+            m_Audio.clip = audioClips[1];
+            m_Audio.Play(0);
+            FireRocket();
         }
 
         public void SetPlayerAttackState(bool state)
@@ -166,26 +178,56 @@ namespace UnityStandardAssets._2D
             m_Anim.SetInteger("AttackType", 0);
         }
 
-        public void AttackHitCheck()
+        public void AttackHitCheck(bool playSoundOnHit, int type)
         {
             //Forward area to place attack check collider
             Vector3 pos = this.transform.position +
                 new Vector3(0.4f * lookX, 0, 0);
 
             //Using a capsule collider to hit check
-            Collider2D[] colliders = Physics2D.OverlapCapsuleAll(pos, new Vector2(1.7f, 3.2f),
+            if (type == 2)
+                pos = fireFrom.transform.position;
+            Collider2D[] colliders = Physics2D.OverlapCapsuleAll(pos, new Vector2(2.0f, 3.2f),
                 CapsuleDirection2D.Vertical, 90.0f);
 
             //Collider2D[] colliders = Physics2D.OverlapCircleAll(pos, 0.8f);
             for (int i = 0; i < colliders.Length; i++)
             {
-                if (colliders[i].gameObject.tag == "Enemy" && !colliders[i].isTrigger)
+                //if (colliders[i].gameObject.tag == "Enemy" && !colliders[i].isTrigger)
+                if(colliders[i].gameObject.layer == 9 && !colliders[i].isTrigger)
                 {
-                    
+
                     colliders[i].gameObject.GetComponent<UnitResources>().TakeDamage(attackValues[attackType]);
-                    print("Enemy Hit");
+                    if (playSoundOnHit)
+                    {
+                        m_Audio.clip = audioClips[type];
+                        m_Audio.Play(0);
+                    }
+                        
+                }
+                else if(colliders[i].gameObject.tag == "BossTurret" && (colliders[i].GetType() == typeof(CapsuleCollider2D)))
+                {
+                    colliders[i].gameObject.GetComponent<UnitResources>().TakeDamage(attackValues[attackType]);
                 }
             }
+        }
+
+        void FireRocket()
+        {
+            //Get the quaternion rotation from the shooter to the target
+            Vector2 destination = fireFrom.transform.position +
+                                  new Vector3(0.4f * lookX, 0, 0);
+            Vector2 center = fireFrom.transform.position;
+            Quaternion rot = Quaternion.FromToRotation(Vector2.down, destination - center);
+
+            //Instantiate the projectile with the correct angle and position
+            GameObject projectile = Instantiate(rocketPrefab, center, rot) as GameObject;
+            projectile.GetComponent<RocketHit>().SetAttributes(attackValues[2]);
+
+
+            //Get the rigid body 2D and apply a force towards the target with given velocity
+            Rigidbody2D rigidbody = projectile.GetComponent<Rigidbody2D>();
+            rigidbody.velocity = (destination - center).normalized * projectileVelocity;
         }
     }
 }

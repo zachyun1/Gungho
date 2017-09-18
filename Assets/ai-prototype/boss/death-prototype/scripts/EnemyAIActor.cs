@@ -10,37 +10,29 @@ using Steer2D;
 [RequireComponent(typeof (CircleCollider2D))]
 [RequireComponent(typeof (Rigidbody2D))]
 [RequireComponent(typeof (Seek))]
-public class EnemyAIActor : MonoBehaviour, Actor {
-
-    public int health;
-    public int maxHealth;
-
-    public float meleeDelay = 0.1f;
-    public float meleeTime = 0.1f;
-
+public class EnemyAIActor : MonoBehaviour, Actor
+{
     public float patrolDelay = 2.0f;
-    public float rangeDelay = 0.1f;
-    public float rangeTime = 0.1f;
-    public float rangeParticleHeight = 1f;
+
     public GameObject[] patrolPoints;
     public GameObject[] turrets;
     public GameObject stageThreePoint;
 
 
-    public float mediumRadius;
+    public float meleeRadius;
 	public float smallRadius;
     public bool shouldTurn;
 
     public float[] weaponReloadSpeed = { 1.0f, 1.0f, 1.0f };
     public float[] stageThreeReloadSpeed = { 6.0f, 6.0f, 6.0f };
 
-
-
     private bool facingRight;
 	private Animator animator;
 	private GameObject target;
     private Seek seek;
     private Image healthBar;
+    private UnitResources res;
+    private AudioSource m_Audio;
 
     private bool[] weaponStatus = { true, false, false };
     private bool[] weaponStatusStageThree = { true, true, true };
@@ -49,24 +41,26 @@ public class EnemyAIActor : MonoBehaviour, Actor {
     private bool patrolReady = true;
     private bool stageThreeReady = false;
 
-    enum AttackTypes
-    {
-        machinegun,
-        nova,
-        cone
-    }
+    bool bumped = false;
+    bool bossDead = false;
 
 	// Use this for initialization
 	void Start () {
-		animator = gameObject.GetComponent<Animator>();
-        seek = gameObject.GetComponent<Seek>();
-        //healthBar = GameObject.Find("BossCanvas").transform.Find("HealthBG").Find("HealthFG").GetComponent<Image>();
+		animator = GetComponent<Animator>();
+        seek = GetComponent<Seek>();
+        res = GetComponent<UnitResources>();
+        m_Audio = GetComponent<AudioSource>();
     }
 
 
     void Update()
     {
-
+        if(res.health <= 0 && !bossDead)
+        {  
+            bossDead = true;
+            m_Audio.Play(0);
+            GameControl.control.PlayerVictory();
+        }
     }
 
     void OnTriggerStay2D(Collider2D collider) {
@@ -81,34 +75,13 @@ public class EnemyAIActor : MonoBehaviour, Actor {
         }
 	}
 
-    public void TakeDamage(int damage)
-    {
-        health -= damage;
-        //healthBar.fillAmount = (float)health / (float)maxHealth;
-        //initCBT(damage.ToString());
-    }
-
-    //public void initCBT(string text)
-    //{
-    //    GameObject temp = Instantiate(CBTprefab) as GameObject;
-    //    RectTransform tempRect = temp.GetComponent<RectTransform>();
-    //    temp.transform.SetParent(GameObject.Find("BossCanvas").transform);
-        
-    //    tempRect.transform.localPosition = CBTprefab.transform.localPosition;
-    //    tempRect.transform.localScale = CBTprefab.transform.localScale;
-    //    tempRect.transform.localRotation = CBTprefab.transform.localRotation;
-
-    //    temp.GetComponent<Text>().text = text;
-    //    temp.GetComponent<Animator>().SetTrigger("Hit");
-    //    Destroy(temp.gameObject, 2.0f);
-    //}
 
 	public bool IsTargetInRange() {
 		return target != null;
 	}
 
 	public bool IsTargetInMeleeRange() {
-		if (target != null && (target.transform.position - transform.position).magnitude <= mediumRadius) {
+		if (target != null && (target.transform.position - transform.position).magnitude <= meleeRadius) {
 			return true;
 		}
 		return false;
@@ -123,10 +96,13 @@ public class EnemyAIActor : MonoBehaviour, Actor {
 
     public bool IsStageThreeInRange()
     {
+        
         if (stageThreePoint != null && (stageThreePoint.transform.position - transform.position).magnitude <= smallRadius)
         {
+            print(true);
             return true;
         }
+        print(false);
         return false;
     }
 
@@ -199,17 +175,23 @@ public class EnemyAIActor : MonoBehaviour, Actor {
     {
         if (stageThreePoint == null)
         {
-            //seek.TargetPoint = transform.position;
             animator.SetBool("move", false);
             return BehaviourTree.State.FAILURE;
         }
         seek.TargetPoint = stageThreePoint.transform.position;
         animator.SetBool("move", true);
-        //setLookAtX(target.transform.position);
         if (IsStageThreeInRange())
         {
             seek.TargetPoint = transform.position;
             animator.SetBool("move", false);
+            GetComponent<CapsuleCollider2D>().enabled = true;
+
+            //Prevent player from geting stuck behind boss
+            if(IsTargetInMeleeRange() && !bumped)
+            {
+                target.transform.position = transform.position + new Vector3(5,0,0);  
+            }
+            bumped = true;
             return BehaviourTree.State.SUCCESS;
         }
         return BehaviourTree.State.RUNNING;
@@ -251,76 +233,6 @@ public class EnemyAIActor : MonoBehaviour, Actor {
         return BehaviourTree.State.RUNNING;
     }
 
-    public BehaviourTree.State PrepareMeleeAttack(BehaviourTreeNode<float> node) {
-        if (target == null)
-        {
-            animator.SetBool("melee", false);
-            animator.SetBool("prepare", false);
-            return BehaviourTree.State.FAILURE;
-        }
-        animator.SetBool("melee", true);
-        animator.SetBool("prepare", true);
-        setLookAtX(target.transform.position);
-        node.Result += Time.deltaTime;
-        if (node.Result > meleeDelay)
-        {
-            node.Result = 0;
-            return BehaviourTree.State.SUCCESS;
-        }
-        return BehaviourTree.State.RUNNING;
-	}
-
-	public BehaviourTree.State MeleeAttack(BehaviourTreeNode<float> node) {
-        animator.SetBool("melee", true);
-        animator.SetBool("prepare", false);
-        float lookx = animator.GetFloat("lookX");
-        node.Result += Time.deltaTime;
-        if (node.Result > meleeTime)
-        {
-            if (target)
-            {
-                Vector2 direction = target.transform.position - transform.position;
-                Collider2D[] colliders = Physics2D.OverlapCircleAll(
-                    transform.position + new Vector3(0.5f * direction.x, 0.5f * direction.y, 0), 1.0f);
-                //GameObject dSphere = Instantiate(debugsphere) as GameObject;
-                //dSphere.transform.position = transform.position + new Vector3(0.5f * direction.x, 0.5f * direction.y, 0);
-                //Destroy(dSphere, 2.0f);
-
-                for (int i = 0; i < colliders.Length; i++)
-                {
-                    if (colliders[i].gameObject.tag == "Player")
-                    {
-                        //colliders[i].gameObject.GetComponent<PlayerResources>().TakeDamage(10);
-                    }
-                }
-            }
-            //Debug.Log("Muahahaha!");
-            node.Result = 0;
-            return BehaviourTree.State.SUCCESS;
-        }
-        return BehaviourTree.State.RUNNING;
-	}
-
-    public BehaviourTree.State PrepareRangeAttack(BehaviourTreeNode<float> node)
-    {
-        if (target == null)
-        {
-            animator.SetBool("range", false);
-            animator.SetBool("prepare", false);
-            return BehaviourTree.State.FAILURE;
-        }
-        animator.SetBool("range", true);
-        animator.SetBool("prepare", true);
-        //setLookAtX(target.transform.position);
-        node.Result += Time.deltaTime;
-        if (node.Result > rangeDelay)
-        {
-            node.Result = 0;
-            return BehaviourTree.State.SUCCESS;
-        }
-        return BehaviourTree.State.RUNNING;
-    }
-
     public BehaviourTree.State LaunchAttack(BehaviourTreeNode<Tuple<float, GameObject>> node)
     {
         animator.SetBool("range", true);
@@ -351,7 +263,6 @@ public class EnemyAIActor : MonoBehaviour, Actor {
         animator.SetBool("prepare", false);
         if (weaponStatusStageThree[0])
         {
-            //GetComponent<SpawnUnderPlayer>().TentacleAttack(target, transform.position.y);
             GetComponent<SpawnUnderPlayer>().SetAttributes(target, transform.position.y, 2);
             StartCoroutine(Reload(weaponStatusStageThree,stageThreeReloadSpeed, 0));
         }
@@ -501,6 +412,7 @@ public class EnemyAIActor : MonoBehaviour, Actor {
 
     public void SetStageThree()
     {
+        weaponStatus = new bool[] { false, false, false };
         stageThreeReady = true;
     }
 }

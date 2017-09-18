@@ -19,7 +19,7 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 4946189363117882}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: SpriteLineVert
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -35,7 +35,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4033227634291286}
   - component: {fileID: 212139252323131778}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Tile1 (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -51,7 +51,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4647085275047480}
   - component: {fileID: 212531432058406464}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Tile1 (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -67,7 +67,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4929908316924070}
   - component: {fileID: 212020629699657538}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Tile1 (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -83,7 +83,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4933410321511394}
   - component: {fileID: 212442836313949282}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Tile1 (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -99,7 +99,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4402918466431186}
   - component: {fileID: 212110719970020624}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Tile1 (6)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -115,7 +115,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4300988298869544}
   - component: {fileID: 212932919714538238}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Tile1 (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}

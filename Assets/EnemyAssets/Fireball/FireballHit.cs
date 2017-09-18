@@ -32,7 +32,6 @@ public class FireballHit : MonoBehaviour {
 
     void OnCollisionEnter2D(Collision2D collision)
     {
-        print("ENTERED");
         if (destroyOnHit)
         {
             if (collision.gameObject.tag == "Player")

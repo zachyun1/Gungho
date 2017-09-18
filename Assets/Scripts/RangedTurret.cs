@@ -9,15 +9,22 @@ public class RangedTurret : EnemyActor {
     public float projectileVelocity;
 
     private bool readyToFire = true;
+    UnitResources res;
 
 	// Use this for initialization
 	void Start () {
-        
+        res = GetComponent<UnitResources>();
 	}
 
 	
 	// Update is called once per frame
 	void Update () {
+        if (res.health <= 0)
+        {
+            res.health = 100;
+            StartCoroutine(LateCall(1.0f));
+        }
+            
         if(readyToFire && target)
         {
             Attack();
@@ -57,5 +64,12 @@ public class RangedTurret : EnemyActor {
     {
         yield return new WaitForSeconds(attackSpeed);
         readyToFire = true;
+    }
+
+    IEnumerator LateCall(float time)
+    {
+        GetComponent<AudioSource>().Play(0);
+        yield return new WaitForSeconds(time);
+        Destroy(gameObject);
     }
 }

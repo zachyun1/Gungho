@@ -6,6 +6,7 @@ public class BossCore : MonoBehaviour {
 
     public GameObject boss;
     public GameObject stageThreeStructures;
+    public int stageThreeThreshold = 10;
 
     bool stageThree = false, stageTwo = false;
     EnemyAIActor bossComp;
@@ -23,28 +24,38 @@ public class BossCore : MonoBehaviour {
 	void Update () {
 		if(health != healthComp.health && (health - healthComp.health > 0))
         {
-            boss.GetComponent<EnemyAIActor>().TakeDamage(health - healthComp.health);
             health = healthComp.health;
         }
-        if(health <= 15 && !stageTwo)
+        if (!bossComp.AreTurretsDead() && !stageTwo)
         {
-            foreach(GameObject turr in bossComp.turrets)
-            {
-                Destroy(turr);
-            }
+            Color col = GetComponent<SpriteRenderer>().color;
+            col.a = 255;
+            GetComponent<SpriteRenderer>().color = col;
+
+            GetComponent<CapsuleCollider2D>().enabled = true;
+
             bossComp.SetWeaponStates(true, true, true);
             stageTwo = true;
-            
-            
         }
-        if(health <= 10 && !stageThree)
+        if(health <= stageThreeThreshold && !stageThree)
         {
-            //GameControl.control.PlayerVictory();
+            GetComponent<Animator>().SetTrigger("CoreDeath");
             boss.GetComponent<Animator>().SetTrigger("StageThree");
+
+            GetComponent<AudioSource>().Play(0);
+
             bossComp.SetStageThree();
             Destroy(stageThreeStructures);
             stageThree = true;
+            StartCoroutine(LateCall());
         }
 	}
+
+    IEnumerator LateCall()
+    {
+        yield return new WaitForSeconds(3.0f);
+        
+        Destroy(gameObject);
+    }
 
 }
