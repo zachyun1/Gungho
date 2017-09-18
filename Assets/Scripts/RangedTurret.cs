@@ -31,6 +31,7 @@ public class RangedTurret : EnemyActor {
             StartCoroutine(Reload());
             readyToFire = false;
         }
+
 	}
 
 
@@ -53,6 +54,7 @@ public class RangedTurret : EnemyActor {
 
         //Instantiate the projectile with the correct angle and position
         GameObject projectile = Instantiate(projectilePrefab, center, rot) as GameObject;
+        projectile.GetComponent<FireballHit>().SetAttributes(attackDamage);
 
 
         //Get the rigid body 2D and apply a force towards the target with given velocity

@@ -5,7 +5,6 @@ using UnityEngine;
 public class ProjectileFire2D : MonoBehaviour
 {
     public GameObject prefab;
-    public GameObject fireFrom;
     public float projectileVelocity;
     public int bulletClip = 0;
     public float attackSpeed;
@@ -44,7 +43,7 @@ public class ProjectileFire2D : MonoBehaviour
     {
         //Get the quaternion rotation from the shooter to the target
         Vector2 destination = target.transform.position;
-        Vector2 center = fireFrom.transform.position;
+        Vector2 center = transform.position;
         Quaternion rot = Quaternion.FromToRotation(Vector2.left, destination - center);
 
         //Instantiate the projectile with the correct angle and position

@@ -13,7 +13,7 @@ public class PlayerResources : MonoBehaviour {
         if(value > 0 && !GameControl.control.getPauseState())
         {
             health -= value;
-            if (health < 0)
+            if (health <= 0)
             {
                 health = 0;
                 GetComponent<AudioSource>().clip = deathSound;
@@ -33,5 +33,10 @@ public class PlayerResources : MonoBehaviour {
                 health = maxHealth;
             }
         }
+    }
+
+    public void Revive()
+    {
+        health = maxHealth;
     }
 }

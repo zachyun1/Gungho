@@ -26,6 +26,7 @@ public class EnemyActor : MonoBehaviour {
     {
         if (collider.gameObject.tag == "Player")
         {
+            print("target found");
             target = collider.gameObject;
         }
     }

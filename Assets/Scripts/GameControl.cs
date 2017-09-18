@@ -10,13 +10,16 @@ public class GameControl : MonoBehaviour {
     public GameObject pausePanel;
     public GameObject deathPanel;
     public GameObject winPanel;
+    public GameObject player;
 
     public AudioClip[] audioClips;
+    public GameObject[] checkpoints;
 
-    public GameObject player;
+
     
     AudioSource m_Audio;
     private bool screenBusy = false;
+    int activeCheckpoint = 0;
 
     void Awake()
     {
@@ -35,10 +38,12 @@ public class GameControl : MonoBehaviour {
         winPanel.SetActive(false);
 
         m_Audio = GetComponent<AudioSource>();
+
     }
 
     void Update()
     {
+        print(activeCheckpoint);
         if (SceneManager.GetActiveScene().buildIndex > 0)
         {
             if (Input.GetKeyDown(KeyCode.Escape))
@@ -53,12 +58,29 @@ public class GameControl : MonoBehaviour {
                 }
             }
         }
+
+        if (!player)
+        {
+            if (!checkpoints[0])
+            {
+                GameObject points = GameObject.FindGameObjectWithTag("Checkpoints");
+                if (points)
+                {
+                    for (int i = 0; i < points.transform.childCount; i++)
+                    {
+                        checkpoints[i] = points.transform.GetChild(i).gameObject;
+                    }
+                }
+            }
+
+            player = GameObject.FindGameObjectWithTag("Player");
+            player.transform.position = checkpoints[activeCheckpoint].transform.position;
+            player.GetComponent<Rigidbody2D>().velocity = new Vector2(0, 0);
+            //player.GetComponent<PlayerResources>().Revive();
+        }
+
     }
 
-    public void LoadMenu()
-    {
-        SceneManager.LoadScene(0);
-    }
 
     public void PlayerDeath()
     {
@@ -107,5 +129,68 @@ public class GameControl : MonoBehaviour {
         yield return new WaitForSeconds(time);
         Time.timeScale = 0.0f;
     }
+
+    public void LoadCheckpoint()
+    {
+        player.GetComponent<Animator>().SetTrigger("Reactivate");
+        deathPanel.SetActive(false);
+        screenBusy = false;
+
+        Time.timeScale = 1.0f;
+        StopAllCoroutines();
+
+        SceneManager.LoadScene(1);
+
+
+    }
+
+    public void LoadMainMenu()
+    {
+        StopAllCoroutines();
+        SceneManager.LoadScene(0);
+    }
+
+    public void LoadLevelStart()
+    {
+        player.GetComponent<Animator>().SetTrigger("Reactivate");
+        deathPanel.SetActive(false);
+        winPanel.SetActive(false);
+        screenBusy = false;
+
+        Time.timeScale = 1.0f;
+        StopAllCoroutines();
+
+        activeCheckpoint = 0;
+
+        SceneManager.LoadScene(1);
+    }
+
+    public void SetActiveCheckpoint(int point)
+    {
+        activeCheckpoint = point;
+    }
+
+    public void UnpauseForMenu()
+    {
+        Continue();
+    }
+
+    public void ResetDeathScreen()
+    {
+        StopAllCoroutines();
+        deathPanel.SetActive(false);
+        screenBusy = false;
+        Time.timeScale = 1.0f;
+    }
+
+    public void ResetVictoryScreen()
+    {
+        StopAllCoroutines();
+        winPanel.SetActive(false);
+        screenBusy = false;
+        Time.timeScale = 1.0f;
+    }
+
+
 
 }
