@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerResources : MonoBehaviour {
 
@@ -9,7 +10,8 @@ public class PlayerResources : MonoBehaviour {
     public AudioClip deathSound;
 
     public GameObject bodyObject;
-
+    public Image healthBar;
+    
     Color damageColor = new Color(1, 0, 0, 1);
     Color defaultColor;
 
@@ -23,6 +25,7 @@ public class PlayerResources : MonoBehaviour {
         if(value > 0 && !GameControl.control.getPauseState())
         {
             health -= value;
+            healthBar.fillAmount = (float)health / (float)maxHealth;
             StopCoroutine("DamageIndicator");
             StartCoroutine(DamageIndicator(0.2f));
             if (health <= 0)
