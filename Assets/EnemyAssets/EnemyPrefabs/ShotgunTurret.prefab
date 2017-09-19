@@ -41,9 +41,9 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1981958363651752}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -102.65, y: 0.33, z: 0}
-  m_LocalScale: {x: 0.95399374, y: 0.9539936, z: 0.9539936}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -202.9, y: -0.28, z: 0}
+  m_LocalScale: {x: 4.5, y: 4.5, z: 4.5}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -82,7 +82,7 @@ CircleCollider2D:
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
-  m_Radius: 8
+  m_Radius: 2.5
 --- !u!61 &61053755878175908
 BoxCollider2D:
   m_ObjectHideFlags: 1
@@ -95,18 +95,18 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0.013684958, y: 0.054745674}
+  m_Offset: {x: 0, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1.43, y: 0.99}
+    oldSize: {x: 0.33, y: 0.22}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 1.1514382, y: 0.91965294}
+  m_Size: {x: 0.3, y: 0.3}
   m_EdgeRadius: 0
 --- !u!82 &82472712532196666
 AudioSource:
@@ -223,6 +223,7 @@ MonoBehaviour:
   attackSpeed: 6
   angle: 5
   damage: 3
+  turret: 1
 --- !u!114 &114566222946475336
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -234,8 +235,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3539d2e108663d54b9c3d14336cfd1cb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  health: 15
-  maxHealth: 15
+  health: 12
+  maxHealth: 12
 --- !u!114 &114685711757823804
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -248,11 +249,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rangeRadius: 5
-  projectilePrefab: {fileID: 1598934600016450, guid: e9e00cf81268f634db319596c369df32,
-    type: 2}
   damage: 3
   attackSpeed: 6
   projectileVelocity: 3
+  projectilePrefab: {fileID: 1598934600016450, guid: e9e00cf81268f634db319596c369df32,
+    type: 2}
+  deathSFX: {fileID: 8300000, guid: c130dea6b0004ab4ba868798000cc56c, type: 3}
 --- !u!212 &212990626432490648
 SpriteRenderer:
   m_ObjectHideFlags: 1
@@ -285,7 +287,7 @@ SpriteRenderer:
   m_SortingLayerID: 1859086223
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: a7afdfa7e0d339a41bfa42bf03f7b03b, type: 3}
+  m_Sprite: {fileID: 21300132, guid: b272e8a83fa09c541a90955f9f4b667b, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0

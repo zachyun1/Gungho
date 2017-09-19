@@ -11,6 +11,7 @@ public class ProjectileSpray2D : MonoBehaviour {
     public float attackSpeed;
     public float angle;
     public int damage;
+    public bool turret = true;
 
     Transform fireFrom;
     GameObject target;
@@ -55,6 +56,10 @@ public class ProjectileSpray2D : MonoBehaviour {
         Vector2 destination = target.transform.position;
         Vector2 center = fireFrom.transform.position;
         Quaternion rot = Quaternion.FromToRotation(Vector2.left, destination - center);
+        Vector3 adjusted = center + (destination - center).normalized;
+
+        if (turret)
+            center = adjusted;
 
         int spread = numberOfProjectiles % 2 == 0 ? numberOfProjectiles / 2 : (numberOfProjectiles - 1) / 2;
         if (numberOfProjectiles % 2 == 0)

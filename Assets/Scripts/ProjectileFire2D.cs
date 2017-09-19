@@ -9,6 +9,7 @@ public class ProjectileFire2D : MonoBehaviour
     public int bulletClip = 0;
     public float attackSpeed;
     public int damage;
+    public bool turret = true;
 
     private bool readyToFire = true;
     private int bulletsLeft = 0;
@@ -42,9 +43,14 @@ public class ProjectileFire2D : MonoBehaviour
     void Attack()
     {
         //Get the quaternion rotation from the shooter to the target
-        Vector2 destination = target.transform.position;
-        Vector2 center = transform.position;
-        Quaternion rot = Quaternion.FromToRotation(Vector2.left, destination - center);
+        Vector3 destination = target.transform.position;
+        Vector3 center = transform.position;
+        Vector3 adjusted = center + (destination - center).normalized;
+
+        if (turret)
+            center = adjusted;
+
+        Quaternion rot = Quaternion.FromToRotation(Vector2.right, destination - center);
 
         //Instantiate the projectile with the correct angle and position
         GameObject projectile = Instantiate(prefab, center, rot) as GameObject;

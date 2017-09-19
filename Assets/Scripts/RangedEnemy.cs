@@ -60,6 +60,15 @@ public class RangedEnemy : MonoBehaviour {
             StartCoroutine(Reload());
             readyToFire = false;
         }
+
+        if(target && !GetComponent<TurretLaser>())
+        {
+            Vector2 destination = target.transform.position;
+            Vector2 center = gameObject.transform.position;
+            Quaternion rot = Quaternion.FromToRotation(Vector2.left, center - destination);
+            transform.rotation = rot;
+        }
+
     }
 
     private bool IsEnemyInRange()
@@ -101,6 +110,8 @@ public class RangedEnemy : MonoBehaviour {
         if (collider.gameObject.tag == "Player")
         {
             target = null;
+            if (laser)
+                laser.SetTarget(null);
         }
     }
 
@@ -113,7 +124,8 @@ public class RangedEnemy : MonoBehaviour {
     void DeathState()
     {
         deathState = true;
-        anim.SetTrigger("Death");
+        if(anim)
+            anim.SetTrigger("Death");
 
         audio.clip = deathSFX;
         audio.Play(0);

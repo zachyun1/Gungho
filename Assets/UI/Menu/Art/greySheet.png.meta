@@ -1,9 +1,10 @@
 fileFormatVersion: 2
 guid: 9e24498e20182c34d84889d9413765fb
-timeCreated: 1505519920
+timeCreated: 1505793094
 licenseType: Free
 TextureImporter:
-  fileIDToRecycleName: {}
+  fileIDToRecycleName:
+    21300000: GreyBar
   serializedVersion: 4
   mipmaps:
     mipMapMode: 0
@@ -81,7 +82,21 @@ TextureImporter:
     overridden: 0
   spriteSheet:
     serializedVersion: 2
-    sprites: []
+    sprites:
+    - serializedVersion: 2
+      name: GreyBar
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 463
+        width: 194
+        height: 49
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
     outline: []
     physicsShape: []
   spritePackingTag: 

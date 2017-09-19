@@ -25,7 +25,7 @@ public class RangedTurret : EnemyActor {
             StartCoroutine(LateCall(1.0f));
         }
             
-        if(readyToFire && target)
+        if(readyToFire && target && projectilePrefab)
         {
             Attack();
             StartCoroutine(Reload());

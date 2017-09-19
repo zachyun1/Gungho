@@ -1,6 +1,7 @@
 ﻿Shader "Outline" {
 	Properties{
-		[Toggle] _UseTwo("Use two?", Int) = 0
+		[Toggle] _ToggleOutlinePass("OutlinePass", Int) = 0
+		//[Toggle] _BasePass("BasePass", Int) = 0
 		_Color("Main Color", Color) = (0,0,0,1)
 		_OutlineColor("Outline Color", Color) = (0,0,0,1)
 		_Outline("Outline width", Range(0.0, 0.03)) = 0.03
@@ -64,6 +65,7 @@
 		Pass
 		{
 			Name "BASE"
+			//Tags{ "LightMode" = "Always" }
 			ZWrite On
 			ZTest LEqual
 			Blend SrcAlpha OneMinusSrcAlpha

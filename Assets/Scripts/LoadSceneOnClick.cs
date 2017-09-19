@@ -8,7 +8,9 @@ public class LoadSceneOnClick : MonoBehaviour {
 
     public void LoadScene(int sceneIndex)
     {
+        
         SceneManager.LoadScene(sceneIndex);
+        GameControl.control.MissionScreen();
     }
 
 }

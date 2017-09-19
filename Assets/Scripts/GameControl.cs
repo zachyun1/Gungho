@@ -10,6 +10,7 @@ public class GameControl : MonoBehaviour {
     public GameObject pausePanel;
     public GameObject deathPanel;
     public GameObject winPanel;
+    public GameObject missionPanel;
     public GameObject player;
 
     public AudioClip[] audioClips;
@@ -36,6 +37,7 @@ public class GameControl : MonoBehaviour {
         pausePanel.SetActive(false);
         deathPanel.SetActive(false);
         winPanel.SetActive(false);
+        missionPanel.SetActive(false);
 
         m_Audio = GetComponent<AudioSource>();
 
@@ -43,7 +45,6 @@ public class GameControl : MonoBehaviour {
 
     void Update()
     {
-        print(activeCheckpoint);
         if (SceneManager.GetActiveScene().buildIndex > 0)
         {
             if (Input.GetKeyDown(KeyCode.Escape))
@@ -74,9 +75,12 @@ public class GameControl : MonoBehaviour {
             }
 
             player = GameObject.FindGameObjectWithTag("Player");
-            player.transform.position = checkpoints[activeCheckpoint].transform.position;
-            player.GetComponent<Rigidbody2D>().velocity = new Vector2(0, 0);
-            //player.GetComponent<PlayerResources>().Revive();
+            if(player)
+            {
+                player.transform.position = checkpoints[activeCheckpoint].transform.position;
+                player.GetComponent<Rigidbody2D>().velocity = new Vector2(0, 0);
+            }
+
         }
 
     }
@@ -116,6 +120,20 @@ public class GameControl : MonoBehaviour {
 
         Time.timeScale = 1;
         pausePanel.SetActive(false);
+        screenBusy = false;
+    }
+
+    public void MissionScreen()
+    {
+        Time.timeScale = 0;
+        missionPanel.SetActive(true);
+        screenBusy = true; 
+    }
+
+    public void ExitMissionScreen()
+    {
+        Time.timeScale = 1;
+        missionPanel.SetActive(false);
         screenBusy = false;
     }
 
@@ -163,6 +181,7 @@ public class GameControl : MonoBehaviour {
         activeCheckpoint = 0;
 
         SceneManager.LoadScene(1);
+        MissionScreen();
     }
 
     public void SetActiveCheckpoint(int point)
