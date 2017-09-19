@@ -11,7 +11,7 @@ public class Teleporter : MonoBehaviour {
 
     void FixedUpdate()
     {
-        if(target && Input.GetKeyDown(KeyCode.W))
+        if(target)
         {
             target.transform.position = new Vector2(teleportLocation.transform.position.x,
                                             teleportLocation.transform.position.y);

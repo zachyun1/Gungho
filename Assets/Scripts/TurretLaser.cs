@@ -71,7 +71,7 @@ public class TurretLaser : MonoBehaviour
 
         GameObject projectileLaser = Instantiate<GameObject>(laserPrefab,
                            adjusted, rot);
-        projectileLaser.GetComponent<FireballHit>().SetAttributes(25);
+        projectileLaser.GetComponent<FireballHit>().SetAttributes(15);
         Destroy(projectileLaser, 0.05f);
 
         StartCoroutine(Reload(attackSpeed));
